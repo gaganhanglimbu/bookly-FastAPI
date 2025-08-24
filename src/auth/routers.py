@@ -6,11 +6,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession # provide to access databa
 from .utils import create_access_token, decode_token, verify_password, generate_password_hash
 from datetime import timedelta
 from fastapi.responses import JSONResponse
-from .dependencies import RefreshTokenBearer, AccessTokenBearer
+from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_current_user, RoleChecker
 from src.db.redis import add_jti_to_blocklist
 
 auth_router = APIRouter()
 user_service = UserService()
+role_checker = RoleChecker(['user','admin'])
 
 @auth_router.post('/signup', response_model=UserModel, status_code=status.HTTP_201_CREATED)
 async def create_user_account(user_data: UserCreateModel, session: AsyncSession = Depends(get_session)):
@@ -32,7 +33,8 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession = Depends
             access_token = create_access_token(
                 user_data={
                     'email': user.email,
-                    'user_uid': str(user.uid)
+                    'user_uid': str(user.uid),
+                    'role': user.role
                 }
             )
             refresh_token = create_access_token(
@@ -81,3 +83,8 @@ async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
         },
         status_code=status.HTTP_200_OK
     )
+
+
+@auth_router.get("/user")
+async def get_current_user(user = Depends(get_current_user), _:bool = Depends(role_checker)):
+    return user

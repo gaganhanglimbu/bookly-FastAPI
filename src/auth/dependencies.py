@@ -10,9 +10,14 @@ credentials → the actual token (e.g., your JWT string).
 
 '''
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Request, HTTPException, status
+from fastapi import Request, HTTPException, status, Depends
 from .utils import decode_token
 from src.db.redis import token_in_blocklist
+from src.db.main import get_session
+from sqlmodel.ext.asyncio.session import AsyncSession
+from .service import UserService
+
+user_service = UserService()
 
 class TokenBearer(HTTPBearer):
     
@@ -66,3 +71,21 @@ class RefreshTokenBearer(TokenBearer):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Please provide an Refresh Token"
             ) 
+        
+async def get_current_user(token_detail: dict = Depends(AccessTokenBearer()), session: AsyncSession = Depends(get_session)):
+    user_email = token_detail["user"]["email"]
+    user = await user_service.get_user(user_email, session)
+    return user
+
+from .models import User
+class RoleChecker:
+    def __init__(self, allowed_roles:list[str]) -> None:
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, current_user:User = Depends(get_current_user)):
+        if current_user.role in self.allowed_roles:
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission Deined! You do not have access"
+        )
