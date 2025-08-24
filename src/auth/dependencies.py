@@ -77,7 +77,7 @@ async def get_current_user(token_detail: dict = Depends(AccessTokenBearer()), se
     user = await user_service.get_user(user_email, session)
     return user
 
-from .models import User
+from src.db.models import User
 class RoleChecker:
     def __init__(self, allowed_roles:list[str]) -> None:
         self.allowed_roles = allowed_roles

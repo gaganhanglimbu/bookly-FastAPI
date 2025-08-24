@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from .schemas import UserCreateModel, UserModel, UserLoginModel
+from .schemas import UserCreateModel, UserModel, UserLoginModel, UserBookModel
 from .service import UserService
 from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession # provide to access database and carried out the transaction. Also helps to execute 
@@ -68,7 +68,7 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
     expiry_timestamp = token_details["exp"]
     if datetime.fromtimestamp(expiry_timestamp) > datetime.now():
         new_access_token = create_access_token(user_data=token_details["user"])
-        return JSONResponse(content={
+        return JSONResponse(content={ 
             "access_token": new_access_token
         })
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalide or Expired token")
@@ -85,6 +85,6 @@ async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
     )
 
 
-@auth_router.get("/user", response_model=UserModel)
+@auth_router.get("/user", response_model=UserBookModel)
 async def get_current_user(user = Depends(get_current_user), _:bool = Depends(role_checker)):
     return user
