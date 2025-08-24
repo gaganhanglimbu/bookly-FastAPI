@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 import uuid
 from datetime import datetime
-
-
+from typing import List
+from src.books.schemas import Book
 class UserCreateModel(BaseModel):
     username: str = Field(max_length=10)
     email: str = Field(max_length=40)
@@ -20,6 +20,7 @@ class UserModel(BaseModel):
     password_hash: str = Field(exclude=True)
     created_at: datetime 
     update_at: datetime 
+    books: List[Book]
 
 
 class UserLoginModel(BaseModel):
