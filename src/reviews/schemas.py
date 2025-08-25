@@ -1,17 +1,20 @@
-from pydantic import BaseModel, Field
 import uuid
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class ReviewModel(BaseModel):
     uid: uuid.UUID
-    review_text: str
     rating: int = Field(lt=5)
+    review_text: str
     user_uid: Optional[uuid.UUID]
-    book_uid: Optional[uuid.UUID] 
+    book_uid: Optional[uuid.UUID]
     created_at: datetime
-    update_at: datetime 
+    update_at: datetime
+
 
 class ReviewCreateModel(BaseModel):
-    review_text: str
     rating: int = Field(lt=5)
+    review_text: str

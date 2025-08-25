@@ -43,7 +43,7 @@ head → means “the latest revision” (the newest migration script in migrati
 
 
 
-
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>              celery -A src.celery_tasks.c_app worker          <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 
